@@ -1,0 +1,10 @@
+{
+  "id": "view-mode-rules",
+  "name": "View Mode Rules",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Set a default view (editing or reading) per note or folder, without using frontmatter.",
+  "author": "Jochen Bernard",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}

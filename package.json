@@ -1,0 +1,25 @@
+{
+  "name": "view-mode-rules",
+  "version": "0.1.0",
+  "description": "Set a default view (editing or reading) per note or folder, without using frontmatter.",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": ["obsidian", "plugin"],
+  "author": "Jochen Bernard",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^16.11.6",
+    "builtin-modules": "^3.3.0",
+    "esbuild": "^0.20.2",
+    "obsidian": "^1.5.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.4.5",
+    "vitest": "^1.5.0"
+  }
+}
