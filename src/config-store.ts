@@ -8,11 +8,8 @@ import {
   RuleTarget
 } from "./types";
 
-type ChangeListener = () => void;
-
 export class ConfigStore {
   private settings: PluginSettings = DEFAULT_SETTINGS;
-  private listeners: Set<ChangeListener> = new Set();
 
   constructor(private plugin: Plugin) {}
 
@@ -27,13 +24,6 @@ export class ConfigStore {
 
   getSettings(): PluginSettings {
     return this.settings;
-  }
-
-  onChange(listener: ChangeListener): () => void {
-    this.listeners.add(listener);
-    return () => {
-      this.listeners.delete(listener);
-    };
   }
 
   getRuleFor(path: string, target: RuleTarget): Rule | undefined {
@@ -90,7 +80,11 @@ export class ConfigStore {
       }
       return r;
     });
-    if (changed) void this.write({ rules: next });
+    if (changed) {
+      this.write({ rules: next }).catch(err =>
+        console.error("view-mode-rules: failed to persist rename", err)
+      );
+    }
   }
 
   handleDelete(file: TAbstractFile): void {
@@ -100,13 +94,14 @@ export class ConfigStore {
       r => !(r.target === "note" && r.path === norm)
     );
     if (next.length !== this.settings.rules.length) {
-      void this.write({ rules: next });
+      this.write({ rules: next }).catch(err =>
+        console.error("view-mode-rules: failed to persist delete", err)
+      );
     }
   }
 
   private async write(patch: Partial<PluginSettings>): Promise<void> {
     this.settings = { ...this.settings, ...patch };
     await this.plugin.saveData(this.settings);
-    for (const listener of this.listeners) listener();
   }
 }
