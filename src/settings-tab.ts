@@ -1,9 +1,13 @@
 import {
   App,
+  FuzzySuggestModal,
   Modal,
   Plugin,
   PluginSettingTab,
-  Setting
+  Setting,
+  TextComponent,
+  TFolder,
+  Vault
 } from "obsidian";
 import { ConfigStore } from "./config-store";
 import { ViewApplier } from "./view-applier";
@@ -119,6 +123,7 @@ export class ViewModeRulesSettingsTab extends PluginSettingTab {
 class AddRuleModal extends Modal {
   private path = "";
   private mode: ViewMode = "preview";
+  private pathInput?: TextComponent;
 
   constructor(
     app: App,
@@ -137,8 +142,8 @@ class AddRuleModal extends Modal {
       .setName("Path")
       .setDesc(
         this.target === "note"
-          ? "Vault-relative path to a note (e.g. Notes/Example.md)."
-          : "Vault-relative path to a folder (e.g. Journal/2026)."
+          ? "Vault-relative path to a note (e.g. Notes/Example.md). Pick from the vault or type manually."
+          : "Vault-relative path to a folder (e.g. Journal/2026). Pick from the vault or type manually."
       )
       .addText(t => {
         t.setPlaceholder(
@@ -147,7 +152,27 @@ class AddRuleModal extends Modal {
         t.onChange(value => {
           this.path = value;
         });
-      });
+        this.pathInput = t;
+      })
+      .addExtraButton(b =>
+        b
+          .setIcon("search")
+          .setTooltip(
+            this.target === "note" ? "Pick a note from the vault" : "Pick a folder from the vault"
+          )
+          .onClick(() => {
+            const paths = collectVaultPaths(this.app.vault, this.target);
+            new PathPickerModal(
+              this.app,
+              paths,
+              this.target === "note" ? "Pick a note..." : "Pick a folder...",
+              (picked) => {
+                this.path = picked;
+                this.pathInput?.setValue(picked);
+              }
+            ).open();
+          })
+      );
 
     new Setting(this.contentEl).setName("Mode").addDropdown(d => {
       d.addOption("source", "Editing").addOption("preview", "Reading");
@@ -172,4 +197,39 @@ class AddRuleModal extends Modal {
   onClose(): void {
     this.contentEl.empty();
   }
+}
+
+class PathPickerModal extends FuzzySuggestModal<string> {
+  constructor(
+    app: App,
+    private paths: string[],
+    private placeholder: string,
+    private onPick: (path: string) => void
+  ) {
+    super(app);
+    this.setPlaceholder(placeholder);
+  }
+
+  getItems(): string[] {
+    return this.paths;
+  }
+
+  getItemText(item: string): string {
+    return item;
+  }
+
+  onChooseItem(item: string): void {
+    this.onPick(item);
+  }
+}
+
+function collectVaultPaths(vault: Vault, target: "note" | "folder"): string[] {
+  if (target === "note") {
+    return vault.getMarkdownFiles().map(f => f.path).sort();
+  }
+  return vault
+    .getAllLoadedFiles()
+    .filter((f): f is TFolder => f instanceof TFolder && f.path !== "/")
+    .map(f => f.path)
+    .sort();
 }
