@@ -683,7 +683,7 @@ export class ViewApplier {
 
   applyAllLeaves(): void {
     for (const leaf of this.workspace.getLeavesOfType("markdown")) {
-      this.applyToLeaf(leaf);
+      void this.applyToLeaf(leaf);
     }
   }
 
@@ -701,16 +701,20 @@ export class ViewApplier {
     const isFirstOpenForLeaf = previousPath === undefined;
     if (!isFirstOpenForLeaf && !this.store.getSettings().applyOnNavigation) return;
 
-    this.applyToLeaf(leaf);
+    void this.applyToLeaf(leaf);
   }
 
   handleLayoutChange(): void {
     const leaf = this.workspace.activeLeaf;
     if (!leaf) return;
-    this.applyToLeaf(leaf);
+    const view = leaf.view;
+    if (!(view instanceof MarkdownView) || !view.file) return;
+    if (this.lastPath.has(leaf)) return;
+    this.lastPath.set(leaf, view.file.path);
+    void this.applyToLeaf(leaf);
   }
 
-  applyToLeaf(leaf: WorkspaceLeaf): void {
+  async applyToLeaf(leaf: WorkspaceLeaf): Promise<void> {
     if (this.applying.has(leaf)) return;
     const view = leaf.view;
     if (!(view instanceof MarkdownView) || !view.file) return;
@@ -722,7 +726,7 @@ export class ViewApplier {
     this.applying.add(leaf);
     try {
       const state = leaf.getViewState();
-      void leaf.setViewState({
+      await leaf.setViewState({
         ...state,
         state: {
           ...(state.state ?? {}),

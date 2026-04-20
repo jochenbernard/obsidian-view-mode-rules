@@ -57,6 +57,7 @@ Rules are listed in two tables (note rules and folder rules). You can edit a rul
 6. Delete a note that has a rule. The rule disappears.
 7. Toggle `Apply on navigation` off. Open a note in a tab, toggle the view manually, click a link back to the same tab — your manual view is preserved.
 8. Toggle `Apply on workspace restore` on. Close Obsidian with a restored tab in the "wrong" view, reopen; the correct view is applied.
+9. Open a note with a rule, then click Obsidian's view-toggle to switch modes manually. Your toggle sticks; the plugin does not flip it back.
 
 ## License
 
