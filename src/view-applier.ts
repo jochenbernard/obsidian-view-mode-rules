@@ -63,15 +63,12 @@ export class ViewApplier {
 
     this.applying.add(leaf);
     try {
-      const state = leaf.getViewState();
-      await leaf.setViewState({
-        ...state,
-        state: {
-          ...(state.state ?? {}),
-          mode,
-          source: mode === "source"
-        }
-      });
+      // leaf.setViewState accepts a new mode in its payload but the view keeps
+      // its previous mode; MarkdownView.setState applies the mode change.
+      await view.setState(
+        { file: view.file.path, mode, source: mode === "source" },
+        { history: false }
+      );
     } finally {
       this.applying.delete(leaf);
     }
