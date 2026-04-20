@@ -755,8 +755,23 @@ git commit -m "feat: add ViewApplier to enforce configured views on markdown lea
 
 **Files:**
 - Create: `src/menu.ts`
+- Create: `src/obsidian-augment.d.ts`
 
-- [ ] **Step 1: Create `src/menu.ts`**
+- [ ] **Step 1: Create `src/obsidian-augment.d.ts`**
+
+The installed `obsidian` type declarations don't expose `MenuItem.setSubmenu()` even though it exists at runtime. Augment the module so `src/menu.ts` typechecks.
+
+```ts
+import "obsidian";
+
+declare module "obsidian" {
+  interface MenuItem {
+    setSubmenu(): Menu;
+  }
+}
+```
+
+- [ ] **Step 2: Create `src/menu.ts`**
 
 ```ts
 import { Menu, MenuItem, TAbstractFile, TFile, TFolder } from "obsidian";
@@ -804,15 +819,15 @@ export function registerFileMenu(
 }
 ```
 
-- [ ] **Step 2: Typecheck**
+- [ ] **Step 3: Typecheck**
 
 Run: `npx tsc -noEmit -skipLibCheck`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add src/menu.ts
+git add src/obsidian-augment.d.ts src/menu.ts
 git commit -m "feat: add file-explorer context menu for setting default view"
 ```
 
