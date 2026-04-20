@@ -1,0 +1,34 @@
+import { PluginSettings, Rule, ViewMode } from "./types";
+
+export class RuleResolver {
+  constructor(private getSettings: () => PluginSettings) {}
+
+  resolve(filePath: string): ViewMode | null {
+    if (!filePath) return null;
+    const settings = this.getSettings();
+
+    for (const rule of settings.rules) {
+      if (rule.target === "note" && rule.path === filePath) {
+        return rule.mode;
+      }
+    }
+
+    let best: Rule | null = null;
+    for (const rule of settings.rules) {
+      if (rule.target !== "folder") continue;
+      const matches =
+        rule.path === "" || filePath.startsWith(rule.path + "/");
+      if (!matches) continue;
+      if (!best || rule.path.length > best.path.length) {
+        best = rule;
+      }
+    }
+    if (best) return best.mode;
+
+    if (settings.globalDefault === "source" || settings.globalDefault === "preview") {
+      return settings.globalDefault;
+    }
+
+    return null;
+  }
+}
