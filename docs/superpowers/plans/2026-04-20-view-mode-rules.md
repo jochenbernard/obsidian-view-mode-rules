@@ -238,7 +238,7 @@ export interface Rule {
 export type GlobalDefault = ViewMode | "obsidian-default";
 
 export interface PluginSettings {
-  rules: Rule[];
+  rules: readonly Rule[];
   globalDefault: GlobalDefault;
   applyOnWorkspaceRestore: boolean;
   applyOnNavigation: boolean;
@@ -533,7 +533,7 @@ import {
 } from "./types";
 
 export class ConfigStore {
-  private settings: PluginSettings = DEFAULT_SETTINGS;
+  private settings: PluginSettings = { ...DEFAULT_SETTINGS, rules: [] };
 
   constructor(private plugin: Plugin) {}
 
@@ -546,7 +546,7 @@ export class ConfigStore {
     };
   }
 
-  getSettings(): PluginSettings {
+  getSettings(): Readonly<PluginSettings> {
     return this.settings;
   }
 

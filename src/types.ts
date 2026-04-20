@@ -11,7 +11,7 @@ export interface Rule {
 export type GlobalDefault = ViewMode | "obsidian-default";
 
 export interface PluginSettings {
-  rules: Rule[];
+  rules: readonly Rule[];
   globalDefault: GlobalDefault;
   applyOnWorkspaceRestore: boolean;
   applyOnNavigation: boolean;
