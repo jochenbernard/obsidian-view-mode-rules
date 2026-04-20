@@ -28,10 +28,9 @@ export class ViewApplier {
   }
 
   handleFileOpen(_file: TFile | null): void {
-    const leaf = this.workspace.activeLeaf;
-    if (!leaf) return;
-    const view = leaf.view;
-    if (!(view instanceof MarkdownView) || !view.file) return;
+    const view = this.workspace.getActiveViewOfType(MarkdownView);
+    if (!view || !view.file) return;
+    const leaf = view.leaf;
 
     const currentPath = view.file.path;
     const previousPath = this.lastPath.get(leaf);
@@ -45,10 +44,9 @@ export class ViewApplier {
   }
 
   handleLayoutChange(): void {
-    const leaf = this.workspace.activeLeaf;
-    if (!leaf) return;
-    const view = leaf.view;
-    if (!(view instanceof MarkdownView) || !view.file) return;
+    const view = this.workspace.getActiveViewOfType(MarkdownView);
+    if (!view || !view.file) return;
+    const leaf = view.leaf;
     if (this.lastPath.has(leaf)) return;
     this.lastPath.set(leaf, view.file.path);
     void this.applyToLeaf(leaf);
