@@ -45,11 +45,11 @@
   "devDependencies": {
     "@types/node": "^18.19.0",
     "builtin-modules": "^3.3.0",
-    "esbuild": "^0.20.2",
+    "esbuild": "^0.25.0",
     "obsidian": "^1.5.0",
     "tslib": "^2.6.2",
     "typescript": "^5.4.5",
-    "vitest": "^1.5.0"
+    "vitest": "^3.0.0"
   }
 }
 ```
