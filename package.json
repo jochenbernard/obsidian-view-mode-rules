@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "install:plugin": "npm run build && node scripts/install-to-vault.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },

@@ -6,3 +6,4 @@ data.json
 *.tsbuildinfo
 coverage/
 .vitest-cache/
+.obsidian-vault-path

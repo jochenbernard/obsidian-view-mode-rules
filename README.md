@@ -20,7 +20,27 @@ When you open a note, the plugin decides which view to use in this order:
 3. The plugin's global default (Editing, Reading, or "Use Obsidian default").
 4. Obsidian's built-in default view for new tabs.
 
-## Install (manual)
+## Install
+
+### Scripted (recommended)
+
+```sh
+npm install
+npm run install:plugin -- /absolute/path/to/your/vault
+```
+
+This builds the plugin and copies `manifest.json` and `main.js` into `<vault>/.obsidian/plugins/view-mode-rules/`.
+
+Alternatives for passing the vault path:
+
+- Env var: `OBSIDIAN_VAULT_PATH=/path/to/vault npm run install:plugin`
+- Local file: `echo /path/to/vault > .obsidian-vault-path` (gitignored), then `npm run install:plugin`
+
+Resolution order is CLI arg → env var → `.obsidian-vault-path`.
+
+After installing, reload Obsidian (`Cmd/Ctrl+P → "Reload app without saving"`) and enable the plugin under `Settings → Community plugins`.
+
+### Manual
 
 1. `npm install && npm run build`
 2. Copy `manifest.json` and `main.js` into your vault's `.obsidian/plugins/view-mode-rules/` folder.
