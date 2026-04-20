@@ -11,7 +11,7 @@ import {
 } from "obsidian";
 import { ConfigStore } from "./config-store";
 import { ViewApplier } from "./view-applier";
-import { GlobalDefault, RuleTarget, ViewMode } from "./types";
+import { RuleTarget, ViewMode, isGlobalDefault, isViewMode } from "./types";
 
 export class ViewModeRulesSettingsTab extends PluginSettingTab {
   constructor(
@@ -38,7 +38,8 @@ export class ViewModeRulesSettingsTab extends PluginSettingTab {
           .addOption("preview", "Reading")
           .setValue(settings.globalDefault)
           .onChange(async value => {
-            await this.store.setGlobalDefault(value as GlobalDefault);
+            if (!isGlobalDefault(value)) return;
+            await this.store.setGlobalDefault(value);
           })
       );
 
@@ -93,7 +94,8 @@ export class ViewModeRulesSettingsTab extends PluginSettingTab {
             .addOption("preview", "Reading")
             .setValue(rule.mode)
             .onChange(async value => {
-              await this.store.setRule({ ...rule, mode: value as ViewMode });
+              if (!isViewMode(value)) return;
+              await this.store.setRule({ ...rule, mode: value });
               this.applier.applyAllLeaves();
             })
         )
@@ -178,7 +180,9 @@ class AddRuleModal extends Modal {
       d.addOption("source", "Editing").addOption("preview", "Reading");
       d.setValue(this.mode);
       d.onChange(value => {
-        this.mode = value as ViewMode;
+        if (isViewMode(value)) {
+          this.mode = value;
+        }
       });
     });
 

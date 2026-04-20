@@ -225,7 +225,8 @@ git commit -m "chore: scaffold plugin repo with build + test tooling"
 - [ ] **Step 1: Create `src/types.ts`**
 
 ```ts
-export type ViewMode = "source" | "preview";
+export const VIEW_MODES = ["source", "preview"] as const;
+export type ViewMode = typeof VIEW_MODES[number];
 
 export type RuleTarget = "note" | "folder";
 
@@ -235,7 +236,8 @@ export interface Rule {
   mode: ViewMode;
 }
 
-export type GlobalDefault = ViewMode | "obsidian-default";
+export const GLOBAL_DEFAULTS = ["obsidian-default", "source", "preview"] as const;
+export type GlobalDefault = typeof GLOBAL_DEFAULTS[number];
 
 export interface PluginSettings {
   rules: readonly Rule[];
@@ -250,6 +252,14 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   applyOnWorkspaceRestore: false,
   applyOnNavigation: true
 };
+
+export function isViewMode(value: string): value is ViewMode {
+  return (VIEW_MODES as readonly string[]).includes(value);
+}
+
+export function isGlobalDefault(value: string): value is GlobalDefault {
+  return (GLOBAL_DEFAULTS as readonly string[]).includes(value);
+}
 ```
 
 - [ ] **Step 2: Typecheck**
@@ -380,7 +390,7 @@ Expected: FAIL with errors about `../src/rule-resolver` not found.
 - [ ] **Step 3: Implement `src/rule-resolver.ts`**
 
 ```ts
-import { PluginSettings, Rule, ViewMode } from "./types";
+import { PluginSettings, Rule, ViewMode, isViewMode } from "./types";
 
 export class RuleResolver {
   constructor(private getSettings: () => PluginSettings) {}
@@ -407,7 +417,7 @@ export class RuleResolver {
     }
     if (best) return best.mode;
 
-    if (settings.globalDefault === "source" || settings.globalDefault === "preview") {
+    if (isViewMode(settings.globalDefault)) {
       return settings.globalDefault;
     }
 
@@ -851,7 +861,7 @@ import {
 } from "obsidian";
 import { ConfigStore } from "./config-store";
 import { ViewApplier } from "./view-applier";
-import { GlobalDefault, RuleTarget, ViewMode } from "./types";
+import { RuleTarget, ViewMode, isGlobalDefault, isViewMode } from "./types";
 
 export class ViewModeRulesSettingsTab extends PluginSettingTab {
   constructor(
@@ -878,7 +888,8 @@ export class ViewModeRulesSettingsTab extends PluginSettingTab {
           .addOption("preview", "Reading")
           .setValue(settings.globalDefault)
           .onChange(async value => {
-            await this.store.setGlobalDefault(value as GlobalDefault);
+            if (!isGlobalDefault(value)) return;
+            await this.store.setGlobalDefault(value);
           })
       );
 
@@ -933,7 +944,8 @@ export class ViewModeRulesSettingsTab extends PluginSettingTab {
             .addOption("preview", "Reading")
             .setValue(rule.mode)
             .onChange(async value => {
-              await this.store.setRule({ ...rule, mode: value as ViewMode });
+              if (!isViewMode(value)) return;
+              await this.store.setRule({ ...rule, mode: value });
               this.applier.applyAllLeaves();
             })
         )
@@ -1018,7 +1030,9 @@ class AddRuleModal extends Modal {
       d.addOption("source", "Editing").addOption("preview", "Reading");
       d.setValue(this.mode);
       d.onChange(value => {
-        this.mode = value as ViewMode;
+        if (isViewMode(value)) {
+          this.mode = value;
+        }
       });
     });
 

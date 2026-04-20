@@ -1,4 +1,4 @@
-import { PluginSettings, Rule, ViewMode } from "./types";
+import { PluginSettings, Rule, ViewMode, isViewMode } from "./types";
 
 export class RuleResolver {
   constructor(private getSettings: () => PluginSettings) {}
@@ -25,7 +25,7 @@ export class RuleResolver {
     }
     if (best) return best.mode;
 
-    if (settings.globalDefault === "source" || settings.globalDefault === "preview") {
+    if (isViewMode(settings.globalDefault)) {
       return settings.globalDefault;
     }
 
