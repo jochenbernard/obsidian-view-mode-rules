@@ -7,6 +7,7 @@ export class ViewApplier {
   private lastPath = new WeakMap<WorkspaceLeaf, string>();
   private applying = new WeakSet<WorkspaceLeaf>();
   private savedMode = new WeakMap<WorkspaceLeaf, ViewMode>();
+  private applyOnNextLayoutChange = new WeakSet<WorkspaceLeaf>();
 
   constructor(
     private workspace: Workspace,
@@ -42,15 +43,28 @@ export class ViewApplier {
     const isFirstOpenForLeaf = previousPath === undefined;
     if (!isFirstOpenForLeaf && !this.store.getSettings().applyOnNavigation) return;
 
-    void this.applyToLeaf(leaf);
+    // Obsidian fires 'file-open' synchronously while still transitioning the
+    // leaf's mode, so view.getMode() here is stale (e.g. still "preview"
+    // inherited from a Homepage-forced Reading view on the source note). Defer
+    // the apply to the next 'layout-change' event, which fires once the new
+    // mode has been committed.
+    this.applyOnNextLayoutChange.add(leaf);
   }
 
   handleLayoutChange(): void {
     const view = this.workspace.getActiveViewOfType(MarkdownView);
     if (!view || !view.file) return;
     const leaf = view.leaf;
-    if (this.lastPath.has(leaf)) return;
-    this.lastPath.set(leaf, view.file.path);
+
+    if (!this.lastPath.has(leaf)) {
+      this.lastPath.set(leaf, view.file.path);
+      this.applyOnNextLayoutChange.delete(leaf);
+      void this.applyToLeaf(leaf);
+      return;
+    }
+
+    if (!this.applyOnNextLayoutChange.has(leaf)) return;
+    this.applyOnNextLayoutChange.delete(leaf);
     void this.applyToLeaf(leaf);
   }
 
