@@ -1,10 +1,12 @@
 import { MarkdownView, TFile, Workspace, WorkspaceLeaf } from "obsidian";
 import { ConfigStore } from "./config-store";
 import { RuleResolver } from "./rule-resolver";
+import { ViewMode } from "./types";
 
 export class ViewApplier {
   private lastPath = new WeakMap<WorkspaceLeaf, string>();
   private applying = new WeakSet<WorkspaceLeaf>();
+  private savedMode = new WeakMap<WorkspaceLeaf, ViewMode>();
 
   constructor(
     private workspace: Workspace,
@@ -57,16 +59,38 @@ export class ViewApplier {
     const view = leaf.view;
     if (!(view instanceof MarkdownView) || !view.file) return;
 
-    const mode = this.resolver.resolve(view.file.path);
-    if (mode === null) return;
-    if (view.getMode() === mode) return;
+    const filePath = view.file.path;
+    const ruleMode = this.resolver.resolve(filePath);
+    const currentMode = view.getMode();
 
+    if (ruleMode === null) {
+      const saved = this.savedMode.get(leaf);
+      if (saved === undefined) return;
+      this.savedMode.delete(leaf);
+      if (currentMode === saved) return;
+      await this.writeMode(leaf, view, filePath, saved);
+      return;
+    }
+
+    if (!this.savedMode.has(leaf)) {
+      this.savedMode.set(leaf, currentMode);
+    }
+    if (currentMode === ruleMode) return;
+    await this.writeMode(leaf, view, filePath, ruleMode);
+  }
+
+  private async writeMode(
+    leaf: WorkspaceLeaf,
+    view: MarkdownView,
+    filePath: string,
+    mode: ViewMode
+  ): Promise<void> {
     this.applying.add(leaf);
     try {
       // leaf.setViewState accepts a new mode in its payload but the view keeps
       // its previous mode; MarkdownView.setState applies the mode change.
       await view.setState(
-        { file: view.file.path, mode, source: mode === "source" },
+        { file: filePath, mode, source: mode === "source" },
         { history: false }
       );
     } finally {
