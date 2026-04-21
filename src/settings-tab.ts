@@ -82,7 +82,7 @@ export class ViewModeRulesSettingsTab extends PluginSettingTab {
       .sort((a, b) => a.path.localeCompare(b.path));
 
     if (rules.length === 0) {
-      container.createEl("p", { text: `No ${target} rules yet.` });
+      new Setting(container).setDesc(`No ${target} rules yet.`);
     }
 
     for (const rule of rules) {
