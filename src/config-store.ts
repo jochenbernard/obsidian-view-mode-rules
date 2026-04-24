@@ -18,7 +18,7 @@ export class ConfigStore {
     this.settings = {
       ...DEFAULT_SETTINGS,
       ...(data ?? {}),
-      rules: Array.isArray(data?.rules) ? data!.rules! : []
+      rules: Array.isArray(data?.rules) ? data.rules : []
     };
   }
 
