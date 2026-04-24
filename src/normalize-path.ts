@@ -5,3 +5,7 @@ export function normalizePath(raw: string): string {
     .replace(/^\/+/, "")
     .replace(/\/+$/, "");
 }
+
+export function isUnderFolder(childPath: string, folderPath: string): boolean {
+  return folderPath === "" || childPath.startsWith(folderPath + "/");
+}

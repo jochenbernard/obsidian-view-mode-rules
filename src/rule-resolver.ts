@@ -1,3 +1,4 @@
+import { isUnderFolder } from "./normalize-path";
 import { PluginSettings, Rule, ViewMode, isViewMode } from "./types";
 
 export class RuleResolver {
@@ -16,9 +17,7 @@ export class RuleResolver {
     let best: Rule | null = null;
     for (const rule of settings.rules) {
       if (rule.target !== "folder") continue;
-      const matches =
-        rule.path === "" || filePath.startsWith(rule.path + "/");
-      if (!matches) continue;
+      if (!isUnderFolder(filePath, rule.path)) continue;
       if (!best || rule.path.length > best.path.length) {
         best = rule;
       }

@@ -1,5 +1,6 @@
 import {
   App,
+  DropdownComponent,
   FuzzySuggestModal,
   Modal,
   Plugin,
@@ -31,17 +32,14 @@ export class ViewModeRulesSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Global default")
       .setDesc("Used when no note or folder rule matches.")
-      .addDropdown(d =>
-        d
-          .addOption("obsidian-default", "Use Obsidian default")
-          .addOption("source", "Editing")
-          .addOption("preview", "Reading")
-          .setValue(settings.globalDefault)
-          .onChange(async value => {
-            if (!isGlobalDefault(value)) return;
-            await this.store.setGlobalDefault(value);
-          })
-      );
+      .addDropdown(d => {
+        d.addOption("obsidian-default", "Use Obsidian default");
+        addViewModeOptions(d);
+        d.setValue(settings.globalDefault).onChange(async value => {
+          if (!isGlobalDefault(value)) return;
+          await this.store.setGlobalDefault(value);
+        });
+      });
 
     new Setting(containerEl)
       .setName("Apply on workspace restore")
@@ -88,17 +86,14 @@ export class ViewModeRulesSettingsTab extends PluginSettingTab {
     for (const rule of rules) {
       new Setting(container)
         .setName(rule.path || "(vault root)")
-        .addDropdown(d =>
-          d
-            .addOption("source", "Editing")
-            .addOption("preview", "Reading")
-            .setValue(rule.mode)
-            .onChange(async value => {
-              if (!isViewMode(value)) return;
-              await this.store.setRule({ ...rule, mode: value });
-              this.applier.applyAllLeaves();
-            })
-        )
+        .addDropdown(d => {
+          addViewModeOptions(d);
+          d.setValue(rule.mode).onChange(async value => {
+            if (!isViewMode(value)) return;
+            await this.store.setRule({ ...rule, mode: value });
+            this.applier.applyAllLeaves();
+          });
+        })
         .addExtraButton(b =>
           b
             .setIcon("trash")
@@ -177,7 +172,7 @@ class AddRuleModal extends Modal {
       );
 
     new Setting(this.contentEl).setName("Mode").addDropdown(d => {
-      d.addOption("source", "Editing").addOption("preview", "Reading");
+      addViewModeOptions(d);
       d.setValue(this.mode);
       d.onChange(value => {
         if (isViewMode(value)) {
@@ -225,6 +220,11 @@ class PathPickerModal extends FuzzySuggestModal<string> {
   onChooseItem(item: string): void {
     this.onPick(item);
   }
+}
+
+function addViewModeOptions(dropdown: DropdownComponent): void {
+  dropdown.addOption("source", "Editing");
+  dropdown.addOption("preview", "Reading");
 }
 
 function collectVaultPaths(vault: Vault, target: "note" | "folder"): string[] {

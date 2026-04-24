@@ -1,5 +1,5 @@
 import { Plugin, TAbstractFile, TFile } from "obsidian";
-import { normalizePath } from "./normalize-path";
+import { isUnderFolder, normalizePath } from "./normalize-path";
 import {
   DEFAULT_SETTINGS,
   GlobalDefault,
@@ -74,7 +74,7 @@ export class ConfigStore {
         changed = true;
         return { ...r, path: newNorm };
       }
-      if (r.path.startsWith(oldNorm + "/")) {
+      if (oldNorm !== "" && isUnderFolder(r.path, oldNorm)) {
         changed = true;
         return { ...r, path: newNorm + r.path.slice(oldNorm.length) };
       }
