@@ -61,10 +61,10 @@ export class ViewModeRulesSettingsTab extends PluginSettingTab {
         })
       );
 
-    containerEl.createEl("h3", { text: "Note rules" });
+    new Setting(containerEl).setName("Note rules").setHeading();
     this.renderRuleList(containerEl, "note");
 
-    containerEl.createEl("h3", { text: "Folder rules" });
+    new Setting(containerEl).setName("Folder rules").setHeading();
     this.renderRuleList(containerEl, "folder");
 
     if (settings.rules.length === 0) {

@@ -1,6 +1,6 @@
 {
   "name": "view-mode-rules",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Set a default view (editing or reading) per note or folder, without using frontmatter.",
   "main": "main.js",
   "type": "module",
@@ -14,6 +14,14 @@
   "keywords": ["obsidian", "plugin"],
   "author": "Jochen Bernard",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jochenbernard/obsidian-view-mode-rules.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jochenbernard/obsidian-view-mode-rules/issues"
+  },
+  "homepage": "https://github.com/jochenbernard/obsidian-view-mode-rules#readme",
   "devDependencies": {
     "@types/node": "^18.19.0",
     "builtin-modules": "^3.3.0",
